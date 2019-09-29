@@ -7,6 +7,7 @@ cryptography
 flake8
 flake8-bugbear
 flake8-comprehensions
+hypercorn
 isort
 mypy
 pytest
