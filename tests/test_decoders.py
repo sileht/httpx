@@ -10,6 +10,7 @@ from httpx.decoders import (
     GZipDecoder,
     IdentityDecoder,
     LineDecoder,
+    TextBuffer,
     TextDecoder,
 )
 
@@ -208,6 +209,20 @@ def test_line_decoder_crnl():
     assert decoder.decode("a\r") == []
     assert decoder.decode("\n\r\nb\r\nc") == ["a\n", "\n", "b\n"]
     assert decoder.flush() == ["c"]
+
+
+def test_text_buffer():
+    buffer = TextBuffer(chunk_size=3)
+    buffer.feed("Hello, world!", flush=True) == ["Hel", "lo,", " wo", "rld", "!"]
+
+    buffer = TextBuffer(chunk_size=3)
+    buffer.feed("Hello, world!") == ["Hel", "lo,", " wo", "rld"]
+    buffer.feed("", flush=True) == ["!"]
+
+    decoder = TextDecoder(encoding="utf-8")
+    buffer = TextBuffer(child=decoder)
+    buffer.feed("Hello, world!") == ["Hello, world!"]
+    buffer.feed("", flush=True) == []
 
 
 def test_invalid_content_encoding_header():

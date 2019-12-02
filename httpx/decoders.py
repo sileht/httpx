@@ -149,7 +149,7 @@ class MultiDecoder(Decoder):
 
 class TextDecoder:
     """
-    Handles incrementally decoding bytes into text
+    Handles incrementally decoding bytes into text.
     """
 
     def __init__(self, encoding: typing.Optional[str] = None):
@@ -270,6 +270,28 @@ class LineDecoder:
             lines = []
         self.buffer = ""
         return lines
+
+
+class TextBuffer:
+    def __init__(self, chunk_size: int = None):
+        self.chunk_size = chunk_size
+        self.buffer = ""
+
+    def feed(self, chunk: str, flush=False) -> typing.List[str]:
+        if self.chunk_size is None:
+            return [chunk] if chunk else []
+
+        self.buffer += chunk
+        parts = []
+        while len(self.buffer) >= self.chunk_size:
+            parts.append(self.buffer[: self.chunk_size])
+            self.buffer = self.buffer[self.chunk_size :]
+
+        if flush:
+            parts += [self.buffer] if self.buffer else []
+            self.buffer = ""
+
+        return parts
 
 
 SUPPORTED_DECODERS = {

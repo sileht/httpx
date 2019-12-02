@@ -165,6 +165,18 @@ async def test_stream_text():
 
 
 @pytest.mark.asyncio
+async def test_stream_text_with_chunk_size():
+    response = httpx.Response(200, content=b"Hello, world!")
+
+    await response.read()
+
+    parts = []
+    async for part in response.stream_text(chunk_size=3):
+        parts.append(part)
+    assert parts == ["Hel", "lo,", " wo", "rld", "!"]
+
+
+@pytest.mark.asyncio
 async def test_stream_lines():
     response = httpx.Response(200, content=b"Hello,\nworld!")
 

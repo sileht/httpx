@@ -19,6 +19,7 @@ from .decoders import (
     IdentityDecoder,
     LineDecoder,
     MultiDecoder,
+    TextBuffer,
     TextDecoder,
 )
 from .exceptions import (
@@ -926,16 +927,22 @@ class Response:
                 yield self.decoder.decode(chunk)
             yield self.decoder.flush()
 
-    async def stream_text(self) -> typing.AsyncIterator[str]:
+    async def stream_text(self, chunk_size: int = None) -> typing.AsyncIterator[str]:
         """
         A str-iterator over the decoded response content
         that handles both gzip, deflate, etc but also detects the content's
         string encoding.
         """
         decoder = TextDecoder(encoding=self.charset_encoding)
+        buffer = TextBuffer(chunk_size=chunk_size)
         async for chunk in self.stream():
-            yield decoder.decode(chunk)
-        yield decoder.flush()
+            text = decoder.decode(chunk)
+            for line in buffer.feed(text):
+                yield line
+
+        text = decoder.flush()
+        for line in buffer.feed(text, flush=True):
+            yield line
 
     async def stream_lines(self) -> typing.AsyncIterator[str]:
         decoder = LineDecoder()
