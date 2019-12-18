@@ -908,7 +908,7 @@ class Response:
     def __repr__(self) -> str:
         return f"<Response [{self.status_code} {self.reason_phrase}]>"
 
-    async def read(self) -> bytes:
+    async def aread(self) -> bytes:
         """
         Read and return the response content.
         """
@@ -978,7 +978,7 @@ class Response:
             self.is_stream_consumed = True
             async for part in self._raw_stream:
                 yield part
-            await self.close()
+            await self.aclose()
 
     async def next(self) -> "Response":
         """
@@ -989,7 +989,7 @@ class Response:
         assert self.call_next is not None
         return await self.call_next()
 
-    async def close(self) -> None:
+    async def aclose(self) -> None:
         """
         Close the response and release the connection.
         Automatically called if the response body is read to completion.

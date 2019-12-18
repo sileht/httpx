@@ -7,7 +7,7 @@ from httpx.dispatch.connection import HTTPConnection
 async def test_get(server, backend):
     async with HTTPConnection(origin=server.url) as conn:
         response = await conn.request("GET", server.url)
-        await response.read()
+        await response.aread()
         assert response.status_code == 200
         assert response.content == b"Hello, world!"
 
@@ -24,7 +24,7 @@ async def test_premature_close(server, backend):
             response = await conn.request(
                 "GET", server.url.copy_with(path="/premature_close")
             )
-            await response.read()
+            await response.aread()
 
 
 async def test_https_get_with_ssl(https_server, ca_cert_pem_file, backend):
@@ -33,6 +33,6 @@ async def test_https_get_with_ssl(https_server, ca_cert_pem_file, backend):
     """
     async with HTTPConnection(origin=https_server.url, verify=ca_cert_pem_file) as conn:
         response = await conn.request("GET", https_server.url)
-        await response.read()
+        await response.aread()
         assert response.status_code == 200
         assert response.content == b"Hello, world!"
